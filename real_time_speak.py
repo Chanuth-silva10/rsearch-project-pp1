@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 import pyaudio
 import wave
@@ -21,9 +22,9 @@ emotions = {
     "07": "disgust",
     "08": "surprised",
 }
+1
 
-
-observed_emotions = ["calm", "fearful", "disgust"]
+observed_emotions = ["happy", "calm"]
 
 
 model = MLPClassifier(
@@ -103,7 +104,7 @@ def extract_feature(file_name, mfcc, chroma, mel):
     return result
 
 
-def load_data(test_size=0.2):
+def load_data():
     x, y = [], []
     for file in glob.glob(
         "C:/Users/kumar/OneDrive/Desktop/Research_Project_PP1/Dataset/Actor_*/*.wav"
@@ -113,18 +114,24 @@ def load_data(test_size=0.2):
 
         
 
-        if emotion not in observed_emotions:
+        if emotion in observed_emotions:
             continue
         feature = extract_feature(file, mfcc=True, chroma=True, mel=True)
         x.append(feature)
         y.append(emotion)
-    return train_test_split(np.array(x), y, test_size=test_size, random_state=9)
+    return np.array(x), y
 
 
 def trainModel():
     
-    x_train, x_test, y_train, y_test = load_data(test_size=0.25)
+    x, y = load_data()
 
+    # Normalize features
+    scaler = StandardScaler()
+    x = scaler.fit_transform(x)
+    
+    x_train, x_test, y_train, y_test = train_test_split( x, y ,test_size=0.25, random_state=9)
+    
     
     print((x_train.shape[0], x_test.shape[0]))
 
